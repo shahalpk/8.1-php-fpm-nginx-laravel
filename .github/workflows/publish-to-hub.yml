@@ -2,7 +2,8 @@ name: Publish image to Docker Hub
 on:
   push:
 jobs:
-  build:
+  publish:
+    environment: DockerHub
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
