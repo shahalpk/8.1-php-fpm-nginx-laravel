@@ -1,0 +1,31 @@
+#!/command/with-contenv bash
+
+PUID=${PUID:-9999}
+PGID=${PGID:-9999}
+WEBUSER_HOME=${WEBUSER_HOME:-"/var/www/html"}
+
+# Exit on error
+set -e
+
+echo "🏃‍♂️ Running Laravel Prod"
+
+
+# Check to see if an Artisan file exists and assume it means Laravel is configured.
+if [ -f $WEBUSER_HOME/artisan ]; then
+        echo "🏃‍♂️ Found artisan. Proceeding..."
+
+        cd $WEBUSER_HOME
+
+        chown -R $PUID:$PGID storage/ bootstrap/cache/
+        php artisan storage:link
+
+        s6-setuidgid webuser php artisan config:cache
+        s6-setuidgid webuser php artisan route:cache
+        s6-setuidgid webuser php artisan view:cache
+        s6-setuidgid webuser php artisan event:cache
+        
+else
+    echo "👉 Skipping Laravel prod because we could not detect a Laravel install or it was specifically disabled..."
+fi
+
+exit 0
